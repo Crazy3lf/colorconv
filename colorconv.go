@@ -1,4 +1,4 @@
-// colorconv package provide conversion of color to HSL, HSV and hex value.
+// Package colorconv provide conversion of color to HSL, HSV and hex value.
 // All the conversion methods is based on the website: https://www.rapidtables.com/convert/color/index.html
 package colorconv
 
@@ -10,25 +10,28 @@ import (
 	"strings"
 )
 
+//ColorToHSL convert Color into HSL triple, ignoring the alpha channel.
 func ColorToHSL(c color.Color) (h, s, l float64) {
 	r, g, b, _ := c.RGBA()
 	return RGBToHSL(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
+//ColorToHSV convert Color into HSV triple, ignoring the alpha channel.
 func ColorToHSV(c color.Color) (h, s, v float64) {
 	r, g, b, _ := c.RGBA()
 	return RGBToHSV(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
+//ColorToHex convert Color into Hex string, ignoring the alpha channel.
 func ColorToHex(c color.Color) string {
 	r, g, b, _ := c.RGBA()
 	return RGBToHex(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
+//RGBToHSL converts a RGB triple to an HSL triple.
 func RGBToHSL(r, g, b uint8) (h, s, l float64) {
 	// TODO add in value-out-of-range error
 	// convert uint32 pre-multiplied value to uint8
-	//var rr, gg, bb = uint8(r/0x101), uint8(g/0x101), uint8(b/0x101)
 	// The r,g,b values are divided by 255 to change the range from 0..255 to 0..1:
 	Rnot := float64(r) / 255
 	Gnot := float64(g) / 255
@@ -60,9 +63,7 @@ func RGBToHSL(r, g, b uint8) (h, s, l float64) {
 	return h, s, l
 }
 
-// TODO make more efficient, compare 2 method
 func getMaxMin(a, b, c float64) (max, min float64) {
-	//return math.Max(a, math.Max(b, c)), math.Min(a, math.Min(b, c))
 	if a > b {
 		max = a
 		min = b
@@ -78,6 +79,7 @@ func getMaxMin(a, b, c float64) (max, min float64) {
 	return max, min
 }
 
+//HSLToRGB converts a HSL triple to an RGB triple.
 func HSLToRGB(h, s, l float64) (r, g, b uint8) {
 	// TODO add in value-out-of-range error
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ l ≤ 1:
@@ -108,11 +110,10 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8) {
 	return r, g, b
 }
 
-// TODO change to take rgb as uint8 (refer to color.RGBToCMYK() and color.RGBToYCbCr())
+//RGBToHSV converts a RGB triple to an HSV triple.
 func RGBToHSV(r, g, b uint8) (h, s, v float64) {
 	// TODO add in value-out-of-range error
 	// convert uint32 pre-multiplied value to uint8
-	//var rr, gg, bb = uint8(r/0x101), uint8(g/0x101), uint8(b/0x101)
 	// The r,g,b values are divided by 255 to change the range from 0..255 to 0..1:
 	Rnot := float64(r) / 255
 	Gnot := float64(g) / 255
@@ -149,7 +150,7 @@ func RGBToHSV(r, g, b uint8) (h, s, v float64) {
 	return h, s, v
 }
 
-// TODO change to return uint8 (refer to color.CMYKToRGB() and color.YCbCrToRGB())
+//HSVToRGB converts a HSV triple to an RGB triple.
 func HSVToRGB(h, s, v float64) (r, g, b uint8) {
 	// TODO add in value-out-of-range error
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ v ≤ 1:
@@ -180,11 +181,13 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8) {
 	return r, g, b
 }
 
+//RGBToHex converts a RGB triple to an Hex string in the format of 0xffff.
 func RGBToHex(r, g, b uint8) string {
 	// TODO add in value-out-of-range error
 	return fmt.Sprintf("0x%02x%02x%02x", r, g, b)
 }
 
+//HexToRGB converts a Hex string to an RGB triple.
 func HexToRGB(hex string) (r, g, b uint8) {
 	// remove prefixes if found in the input string
 	hex = strings.Replace(hex, "0x", "", -1)
