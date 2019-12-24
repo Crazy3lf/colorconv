@@ -148,4 +148,3 @@ func BenchmarkRGBToHSV(b *testing.B) {
 		}
 	})
 }
-
