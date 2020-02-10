@@ -10,6 +10,8 @@ import (
 	"strings"
 )
 
+//TODO extract errors
+
 //ColorToHSL convert Color into HSL triple, ignoring the alpha channel.
 func ColorToHSL(c color.Color) (h, s, l float64) {
 	r, g, b, _ := c.RGBA()
@@ -30,58 +32,45 @@ func ColorToHex(c color.Color) string {
 
 //RGBToHSL converts a RGB triple to an HSL triple.
 func RGBToHSL(r, g, b uint8) (h, s, l float64) {
-	// TODO add in value-out-of-range error
 	// convert uint32 pre-multiplied value to uint8
 	// The r,g,b values are divided by 255 to change the range from 0..255 to 0..1:
 	Rnot := float64(r) / 255
 	Gnot := float64(g) / 255
 	Bnot := float64(b) / 255
 	Cmax, Cmin := getMaxMin(Rnot, Gnot, Bnot)
-	delta := Cmax - Cmin
+	Δ := Cmax - Cmin
 	// Lightness calculation:
 	l = (Cmax + Cmin) / 2
 	// Hue and Saturation Calculation:
-	if delta == 0 {
+	if Δ == 0 {
 		h = 0
 		s = 0
 	} else {
 		switch Cmax {
 		case Rnot:
-			h = 60 * (math.Mod((Gnot-Bnot)/delta, 6))
+			h = 60 * (math.Mod((Gnot-Bnot)/Δ, 6))
 		case Gnot:
-			h = 60 * (((Bnot - Rnot) / delta) + 2)
+			h = 60 * (((Bnot - Rnot) / Δ) + 2)
 		case Bnot:
-			h = 60 * (((Rnot - Gnot) / delta) + 4)
+			h = 60 * (((Rnot - Gnot) / Δ) + 4)
 		}
 		if h < 0 {
 			h += 360
 		}
 
-		s = delta / (1 - math.Abs((2*l)-1))
+		s = Δ / (1 - math.Abs((2*l)-1))
 	}
 
-	return h, s, l
-}
-
-func getMaxMin(a, b, c float64) (max, min float64) {
-	if a > b {
-		max = a
-		min = b
-	} else {
-		max = b
-		min = a
-	}
-	if c > max {
-		max = c
-	} else if c < min {
-		min = c
-	}
-	return max, min
+	return h, round(s), round(l)
 }
 
 //HSLToRGB converts a HSL triple to an RGB triple.
-func HSLToRGB(h, s, l float64) (r, g, b uint8) {
-	// TODO add in value-out-of-range error
+func HSLToRGB(h, s, l float64) (r, g, b uint8, err error) {
+	if h < 0 || h >= 360 ||
+		s < 0 || s > 1 ||
+		l < 0 || l > 1 {
+		return 0, 0, 0, fmt.Errorf("inputs out of range")
+	}
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ l ≤ 1:
 	C := (1 - math.Abs((2*l)-1)) * s
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
@@ -107,31 +96,30 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8) {
 	r = uint8(math.Round((Rnot + m) * 255))
 	g = uint8(math.Round((Gnot + m) * 255))
 	b = uint8(math.Round((Bnot + m) * 255))
-	return r, g, b
+	return r, g, b, nil
 }
 
 //RGBToHSV converts a RGB triple to an HSV triple.
 func RGBToHSV(r, g, b uint8) (h, s, v float64) {
-	// TODO add in value-out-of-range error
 	// convert uint32 pre-multiplied value to uint8
 	// The r,g,b values are divided by 255 to change the range from 0..255 to 0..1:
 	Rnot := float64(r) / 255
 	Gnot := float64(g) / 255
 	Bnot := float64(b) / 255
 	Cmax, Cmin := getMaxMin(Rnot, Gnot, Bnot)
-	delta := Cmax - Cmin
+	Δ := Cmax - Cmin
 
 	// Hue calculation:
-	if delta == 0 {
+	if Δ == 0 {
 		h = 0
 	} else {
 		switch Cmax {
 		case Rnot:
-			h = 60 * (math.Mod((Gnot-Bnot)/delta, 6))
+			h = 60 * (math.Mod((Gnot-Bnot)/Δ, 6))
 		case Gnot:
-			h = 60 * (((Bnot - Rnot) / delta) + 2)
+			h = 60 * (((Bnot - Rnot) / Δ) + 2)
 		case Bnot:
-			h = 60 * (((Rnot - Gnot) / delta) + 4)
+			h = 60 * (((Rnot - Gnot) / Δ) + 4)
 		}
 		if h < 0 {
 			h += 360
@@ -142,17 +130,21 @@ func RGBToHSV(r, g, b uint8) (h, s, v float64) {
 	if Cmax == 0 {
 		s = 0
 	} else {
-		s = delta / Cmax
+		s = Δ / Cmax
 	}
 	// Value calculation:
 	v = Cmax
 
-	return h, s, v
+	return h, round(s), round(v)
 }
 
 //HSVToRGB converts a HSV triple to an RGB triple.
-func HSVToRGB(h, s, v float64) (r, g, b uint8) {
-	// TODO add in value-out-of-range error
+func HSVToRGB(h, s, v float64) (r, g, b uint8, err error) {
+	if h < 0 || h >= 360 ||
+		s < 0 || s > 1 ||
+		v < 0 || v > 1 {
+		return 0, 0, 0, fmt.Errorf("inputs out of range")
+	}
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ v ≤ 1:
 	C := v * s
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
@@ -178,36 +170,63 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8) {
 	r = uint8(math.Round((Rnot + m) * 255))
 	g = uint8(math.Round((Gnot + m) * 255))
 	b = uint8(math.Round((Bnot + m) * 255))
-	return r, g, b
+	return r, g, b, nil
 }
 
 //RGBToHex converts a RGB triple to an Hex string in the format of 0xffff.
 func RGBToHex(r, g, b uint8) string {
-	// TODO add in value-out-of-range error
 	return fmt.Sprintf("0x%02x%02x%02x", r, g, b)
 }
 
 //HexToRGB converts a Hex string to an RGB triple.
-func HexToRGB(hex string) (r, g, b uint8) {
+func HexToRGB(hex string) (r, g, b uint8, err error) {
 	// remove prefixes if found in the input string
 	hex = strings.Replace(hex, "0x", "", -1)
 	hex = strings.Replace(hex, "#", "", -1)
-	//TODO check range
 	if len(hex) != 6 {
-		panic("not a valid input")
+		return 0, 0, 0, fmt.Errorf("invalid input")
 	}
 
-	hex2uint8 := func(hexStr string) uint8 {
-		// base 16 for hexadecimal
-		result, err := strconv.ParseUint(hexStr, 16, 8)
-		if err != nil {
-			panic(err)
-		}
-		return uint8(result)
+	r, err = hex2uint8(hex[0:2])
+	if err != nil {
+		return 0, 0, 0, err
 	}
-	r = hex2uint8(hex[0:2])
-	g = hex2uint8(hex[2:4])
-	b = hex2uint8(hex[4:6])
-	// TODO add in value-out-of-range error
-	return r, g, b
+	g, err = hex2uint8(hex[2:4])
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	b, err = hex2uint8(hex[4:6])
+	if err != nil {
+		return 0, 0, 0, err
+	}
+	return r, g, b, nil
+}
+
+func hex2uint8(hexStr string) (uint8, error) {
+	// base 16 for hexadecimal
+	result, err := strconv.ParseUint(hexStr, 16, 8)
+	if err != nil {
+		return 0, err
+	}
+	return uint8(result), nil
+}
+
+func getMaxMin(a, b, c float64) (max, min float64) {
+	if a > b {
+		max = a
+		min = b
+	} else {
+		max = b
+		min = a
+	}
+	if c > max {
+		max = c
+	} else if c < min {
+		min = c
+	}
+	return max, min
+}
+
+func round(x float64) float64 {
+	return x
 }
