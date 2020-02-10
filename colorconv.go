@@ -228,5 +228,5 @@ func getMaxMin(a, b, c float64) (max, min float64) {
 }
 
 func round(x float64) float64 {
-	return x
+	return math.Round(x*1000) / 1000
 }
