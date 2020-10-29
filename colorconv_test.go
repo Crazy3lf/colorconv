@@ -1,6 +1,7 @@
 package colorconv
 
 import (
+	"image/color"
 	"testing"
 )
 
@@ -68,54 +69,109 @@ func TestInvalidHexToRGBInput(t *testing.T) {
 // TestHSLRoundTrip tests that a subset of RGB space can be converted to HSL
 // and back to within 1/256 tolerance.
 func TestHSLRoundTrip(t *testing.T) {
-	for r := 0; r < 256; r += 7 {
-		for g := 0; g < 256; g += 5 {
-			for b := 0; b < 256; b += 3 {
-				r0, g0, b0 := uint8(r), uint8(g), uint8(b)
-				h, s, l := RGBToHSL(r0, g0, b0)
-				r1, g1, b1, err := HSLToRGB(h, s, l)
-				if delta(r0, r1) > 1 || delta(g0, g1) > 1 || delta(b0, b1) > 1 || err != nil {
-					t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, l = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
-						r0, g0, b0, h, s, l, r1, g1, b1, err)
+	t.Run("HSL<->RGB", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					h, s, l := RGBToHSL(r0, g0, b0)
+					r1, g1, b1, err := HSLToRGB(h, s, l)
+					if delta(r0, r1) > 1 || delta(g0, g1) > 1 || delta(b0, b1) > 1 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, l = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
+							r0, g0, b0, h, s, l, r1, g1, b1, err)
+					}
 				}
 			}
 		}
-	}
+	})
+	t.Run("HSL<->Color", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					h, s, l := ColorToHSL(color.RGBA{R: r0, G: g0, B: b0})
+					c, err := HSLToColor(h, s, l)
+					r1, g1, b1, _ := c.RGBA()
+					if delta(r0, uint8(r1)) > 1 || delta(g0, uint8(g1)) > 1 || delta(b0, uint8(b1)) > 1 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, l = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
+							r0, g0, b0, h, s, l, r1, g1, b1, err)
+					}
+				}
+			}
+		}
+	})
 }
 
 // TestHSVRoundTrip tests that a subset of RGB space can be converted to HSV
 // and back to within 1/256 tolerance.
 func TestHSVRoundTrip(t *testing.T) {
-	for r := 0; r < 256; r += 7 {
-		for g := 0; g < 256; g += 5 {
-			for b := 0; b < 256; b += 3 {
-				r0, g0, b0 := uint8(r), uint8(g), uint8(b)
-				h, s, v := RGBToHSV(r0, g0, b0)
-				r1, g1, b1, err := HSVToRGB(h, s, v)
-				if delta(r0, r1) > 1 || delta(g0, g1) > 1 || delta(b0, b1) > 1 || err != nil {
-					t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, v = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
-						r0, g0, b0, h, s, v, r1, g1, b1, err)
+	t.Run("HSV<->RGB", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					h, s, v := RGBToHSV(r0, g0, b0)
+					r1, g1, b1, err := HSVToRGB(h, s, v)
+					if delta(r0, r1) > 1 || delta(g0, g1) > 1 || delta(b0, b1) > 1 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, v = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
+							r0, g0, b0, h, s, v, r1, g1, b1, err)
+					}
 				}
 			}
 		}
-	}
+	})
+	t.Run("HSV<->Color", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					h, s, v := ColorToHSV(color.RGBA{R: r0, G: g0, B: b0})
+					c, err := HSVToColor(h, s, v)
+					r1, g1, b1, _ := c.RGBA()
+					if delta(r0, uint8(r1)) > 1 || delta(g0, uint8(g1)) > 1 || delta(b0, uint8(b1)) > 1 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nh,  s, v = %f, %f, %f\nr1, g1, b1 = %d, %d, %d\nerr = %s",
+							r0, g0, b0, h, s, v, r1, g1, b1, err)
+					}
+				}
+			}
+		}
+	})
 }
 
 // TestHexRoundTrip tests that a subset of RGB space can be converted to Hex and back
 func TestHexRoundTrip(t *testing.T) {
-	for r := 0; r < 256; r += 7 {
-		for g := 0; g < 256; g += 5 {
-			for b := 0; b < 256; b += 3 {
-				r0, g0, b0 := uint8(r), uint8(g), uint8(b)
-				hex := RGBToHex(r0, g0, b0)
-				r1, g1, b1, err := HexToRGB(hex)
-				if delta(r0, r1) != 0 || delta(g0, g1) != 0 || delta(b0, b1) != 0 || err != nil {
-					t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nhex = %s\nr1, g1, b1 = %d, %d, %d",
-						r0, g0, b0, hex, r1, g1, b1)
+	t.Run("Hex<->RGB", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					hex := RGBToHex(r0, g0, b0)
+					r1, g1, b1, err := HexToRGB(hex)
+					if delta(r0, r1) != 0 || delta(g0, g1) != 0 || delta(b0, b1) != 0 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nhex = %s\nr1, g1, b1 = %d, %d, %d",
+							r0, g0, b0, hex, r1, g1, b1)
+					}
 				}
 			}
 		}
-	}
+	})
+
+	t.Run("Hex<->Color", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					hex := ColorToHex(color.RGBA{R: r0, G: g0, B: b0})
+					c, err := HexToColor(hex)
+					r1, g1, b1, _ := c.RGBA()
+					if delta(r0, uint8(r1)) > 1 || delta(g0, uint8(g1)) > 1 || delta(b0, uint8(b1)) > 1 || err != nil {
+						t.Fatalf("\nr0, g0, b0 = %d, %d, %d\nhex = %s\nr1, g1, b1 = %d, %d, %d",
+							r0, g0, b0, hex, r1, g1, b1)
+					}
+				}
+			}
+		}
+	})
 }
 
 // use package level variable instead of ignore return values to avoid compiler optimization
