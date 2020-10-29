@@ -78,9 +78,7 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8, err error) {
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
 	m := l - (C / 2)
 	var Rnot, Gnot, Bnot float64
-	if h >= 360 {
-		h -= 360
-	}
+
 	switch {
 	case 0 <= h && h < 60:
 		Rnot, Gnot, Bnot = C, X, 0
@@ -152,9 +150,6 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8, err error) {
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
 	m := v - C
 	var Rnot, Gnot, Bnot float64
-	if h >= 360 {
-		h -= 360
-	}
 	switch {
 	case 0 <= h && h < 60:
 		Rnot, Gnot, Bnot = C, X, 0
