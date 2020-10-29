@@ -32,6 +32,33 @@ func ColorToHex(c color.Color) string {
 	return RGBToHex(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
+//HSLToColor convert HSL triple into Color.
+func HSLToColor(h, s, l float64) (color.Color,error) {
+	r,g,b,err:=HSLToRGB(h,s,l)
+	if err != nil {
+		return nil,err
+	}
+	return color.RGBA{R: r, G: g, B: b,A:0},nil
+}
+
+//HSVToColor convert HSV triple into Color.
+func HSVToColor(h, s, v float64) (color.Color,error) {
+	r,g,b,err:=HSVToRGB(h,s,v)
+	if err != nil {
+		return nil,err
+	}
+	return color.RGBA{R: r, G: g, B: b,A:0},nil
+}
+
+//HSLToColor convert Hex string into Color.
+func HexToColor(hex string) (color.Color,error) {
+	r,g,b,err:=HexToRGB(hex)
+	if err != nil {
+		return nil,err
+	}
+	return color.RGBA{R: r, G: g, B: b,A:0},nil
+}
+
 //RGBToHSL converts a RGB triple to an HSL triple.
 func RGBToHSL(r, g, b uint8) (h, s, l float64) {
 	// convert uint32 pre-multiplied value to uint8
