@@ -13,8 +13,8 @@ func delta(x, y uint8) uint8 {
 
 // TestValueOutOfRange tests that when inputs are out of range, an error occur
 func TestValueOutOfRange(t *testing.T) {
-	//TODO optimize this test
 	var err error
+
 	const (
 		negativeValue1 = -0.1
 		negativeValue2 = -2.1
@@ -42,15 +42,27 @@ func TestValueOutOfRange(t *testing.T) {
 		t.Fatalf("\nerror not occur")
 	}
 
-	_, _, _, err = HexToRGB("#GGGGGG")
-	if err == nil {
-		t.Fatalf("\nerror not occur")
-	}
-	_, _, _, err = HexToRGB("0xgrewgrewg")
-	if err == nil {
-		t.Fatalf("\nerror not occur")
+}
+
+// TestInvalidHexToRGBInput tests that when inputs are invalid, an error occur
+func TestInvalidHexToRGBInput(t *testing.T) {
+	var err error
+	tests := []struct {
+		input string
+	}{
+		{input: "#GGGGGG"},
+		{input: "0xgrewgrewg"},
+		{input: "0xffxxff"},
+		{input: "0xxxffff"},
+		{input: "0xffffxx"},
 	}
 
+	for _, tc := range tests {
+		_, _, _, err = HexToRGB(tc.input)
+		if err == nil {
+			t.Fatalf("\nerror not occur, input: %s", tc.input)
+		}
+	}
 }
 
 // TestHSLRoundTrip tests that a subset of RGB space can be converted to HSL
