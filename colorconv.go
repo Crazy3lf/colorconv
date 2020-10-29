@@ -14,49 +14,49 @@ import (
 var errInvalidHexValue = errors.New("colorconv: invalid input")
 var errOutOfRange = errors.New("colorconv: inputs out of range")
 
-//ColorToHSL convert Color into HSL triple, ignoring the alpha channel.
+//ColorToHSL convert color.Color into HSL triple, ignoring the alpha channel.
 func ColorToHSL(c color.Color) (h, s, l float64) {
 	r, g, b, _ := c.RGBA()
 	return RGBToHSL(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
-//ColorToHSV convert Color into HSV triple, ignoring the alpha channel.
+//ColorToHSV convert color.Color into HSV triple, ignoring the alpha channel.
 func ColorToHSV(c color.Color) (h, s, v float64) {
 	r, g, b, _ := c.RGBA()
 	return RGBToHSV(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
-//ColorToHex convert Color into Hex string, ignoring the alpha channel.
+//ColorToHex convert color.Color into Hex string, ignoring the alpha channel.
 func ColorToHex(c color.Color) string {
 	r, g, b, _ := c.RGBA()
 	return RGBToHex(uint8(r>>8), uint8(g>>8), uint8(b>>8))
 }
 
-//HSLToColor convert HSL triple into Color.
-func HSLToColor(h, s, l float64) (color.Color,error) {
-	r,g,b,err:=HSLToRGB(h,s,l)
+//HSLToColor convert HSL triple into color.Color.
+func HSLToColor(h, s, l float64) (color.Color, error) {
+	r, g, b, err := HSLToRGB(h, s, l)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return color.RGBA{R: r, G: g, B: b,A:0},nil
+	return color.RGBA{R: r, G: g, B: b, A: 0}, nil
 }
 
-//HSVToColor convert HSV triple into Color.
-func HSVToColor(h, s, v float64) (color.Color,error) {
-	r,g,b,err:=HSVToRGB(h,s,v)
+//HSVToColor convert HSV triple into color.Color.
+func HSVToColor(h, s, v float64) (color.Color, error) {
+	r, g, b, err := HSVToRGB(h, s, v)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return color.RGBA{R: r, G: g, B: b,A:0},nil
+	return color.RGBA{R: r, G: g, B: b, A: 0}, nil
 }
 
-//HSLToColor convert Hex string into Color.
-func HexToColor(hex string) (color.Color,error) {
-	r,g,b,err:=HexToRGB(hex)
+//HSLToColor convert Hex string into color.Color.
+func HexToColor(hex string) (color.Color, error) {
+	r, g, b, err := HexToRGB(hex)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return color.RGBA{R: r, G: g, B: b,A:0},nil
+	return color.RGBA{R: r, G: g, B: b, A: 0}, nil
 }
 
 //RGBToHSL converts a RGB triple to an HSL triple.
@@ -105,9 +105,7 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8, err error) {
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
 	m := l - (C / 2)
 	var Rnot, Gnot, Bnot float64
-	if h >= 360 {
-		h -= 360
-	}
+
 	switch {
 	case 0 <= h && h < 60:
 		Rnot, Gnot, Bnot = C, X, 0
@@ -179,9 +177,6 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8, err error) {
 	X := C * (1 - math.Abs(math.Mod(h/60, 2)-1))
 	m := v - C
 	var Rnot, Gnot, Bnot float64
-	if h >= 360 {
-		h -= 360
-	}
 	switch {
 	case 0 <= h && h < 60:
 		Rnot, Gnot, Bnot = C, X, 0
