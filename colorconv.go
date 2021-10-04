@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-var errInvalidHexValue = errors.New("colorconv: invalid input")
-var errOutOfRange = errors.New("colorconv: inputs out of range")
+var ErrInvalidHexValue = errors.New("colorconv: invalid input")
+var ErrOutOfRange = errors.New("colorconv: inputs out of range")
 
 //ColorToHSL convert color.Color into HSL triple, ignoring the alpha channel.
 func ColorToHSL(c color.Color) (h, s, l float64) {
@@ -98,7 +98,7 @@ func HSLToRGB(h, s, l float64) (r, g, b uint8, err error) {
 	if h < 0 || h >= 360 ||
 		s < 0 || s > 1 ||
 		l < 0 || l > 1 {
-		return 0, 0, 0, errOutOfRange
+		return 0, 0, 0, ErrOutOfRange
 	}
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ l ≤ 1:
 	C := (1 - math.Abs((2*l)-1)) * s
@@ -170,7 +170,7 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8, err error) {
 	if h < 0 || h >= 360 ||
 		s < 0 || s > 1 ||
 		v < 0 || v > 1 {
-		return 0, 0, 0, errOutOfRange
+		return 0, 0, 0, ErrOutOfRange
 	}
 	// When 0 ≤ h < 360, 0 ≤ s ≤ 1 and 0 ≤ v ≤ 1:
 	C := v * s
@@ -208,7 +208,7 @@ func HexToRGB(hex string) (r, g, b uint8, err error) {
 	hex = strings.Replace(hex, "0x", "", -1)
 	hex = strings.Replace(hex, "#", "", -1)
 	if len(hex) != 6 {
-		return 0, 0, 0, errInvalidHexValue
+		return 0, 0, 0, ErrInvalidHexValue
 	}
 
 	r, err = hex2uint8(hex[0:2])
