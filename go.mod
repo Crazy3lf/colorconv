@@ -1,3 +1,3 @@
 module github.com/crazy3lf/colorconv
 
-go 1.13
+go 1.17
