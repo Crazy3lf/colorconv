@@ -9,7 +9,7 @@ on:
       - '*'
     paths:
       - '**.go'
-      - '.github/workflows/go.yml'
+      - ".github/workflows/go.yml"
 
 jobs:
 
