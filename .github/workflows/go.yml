@@ -3,13 +3,13 @@ name: Go
 on:
   push:
     branches:
-      - master
+      - 'master'
   pull_request:
     branches:
-      - *
+      - '*'
     paths:
-      - "**.go"
-      - ".github/workflows/go.yml"
+      - '**.go'
+      - '.github/workflows/go.yml'
 
 jobs:
 
