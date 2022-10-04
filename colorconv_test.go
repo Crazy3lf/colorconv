@@ -11,12 +11,6 @@ func delta(x, y uint8) uint8 {
 	}
 	return y - x
 }
-func delta32(x, y uint32) uint32 {
-	if x >= y {
-		return x - y
-	}
-	return y - x
-}
 
 // TestValueOutOfRange tests that when inputs are out of range, an error occur
 func TestValueOutOfRange(t *testing.T) {
