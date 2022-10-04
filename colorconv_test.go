@@ -11,6 +11,12 @@ func delta(x, y uint8) uint8 {
 	}
 	return y - x
 }
+func delta32(x, y uint32) uint32 {
+	if x >= y {
+		return x - y
+	}
+	return y - x
+}
 
 // TestValueOutOfRange tests that when inputs are out of range, an error occur
 func TestValueOutOfRange(t *testing.T) {
@@ -196,10 +202,37 @@ func TestHexRoundTrip(t *testing.T) {
 	})
 }
 
+// TestRGBGray compare RGBToGrayWithWeight result with RGB to GrayModel conversion in standard library.
+func TestRGBGray(t *testing.T) {
+	t.Run("RGB to Gray", func(t *testing.T) {
+		for r := 0; r < 256; r += 7 {
+			for g := 0; g < 256; g += 5 {
+				for b := 0; b < 256; b += 3 {
+					r0, g0, b0 := uint8(r), uint8(g), uint8(b)
+					c := color.NRGBA{
+						R: r0,
+						G: g0,
+						B: b0,
+						A: 255,
+					}
+					gray := color.GrayModel.Convert(c)
+					r1, g1, b1, _ := RGBToGrayWithWeight(r0, g0, b0, 299, 587, 114).RGBA()
+					r2, g2, b2, _ := gray.RGBA()
+					if delta(uint8(r1>>8), uint8(r2>>8)) > 1 || delta(uint8(g1>>8), uint8(g2>>8)) > 1 || delta(uint8(b1>>8), uint8(b2>>8)) > 1 {
+						t.Fatalf("\nTest value:\tr0, g0, b0 = %d, %d, %d\ncolorconv value:\tr1, g1, b1 = %d, %d, %d\nGrayModel value:\tr2, g2, b2 = %d, %d, %d",
+							r0, g0, b0, uint8(r1>>8), uint8(g1>>8), uint8(b1>>8), uint8(r2>>8), uint8(g2>>8), uint8(b2>>8))
+					}
+				}
+			}
+		}
+	})
+}
+
 // use package level variable instead of ignore return values to avoid compiler optimization
 // https://dave.cheney.net/2013/06/30/how-to-write-benchmarks-in-go
 var sinkUint8 uint8
 var sinkFloat64 float64
+var sinkGray color.Gray
 
 func BenchmarkHSLToRGB(b *testing.B) {
 	// Not really sure how to effectively benchmark these yet
@@ -277,6 +310,26 @@ func BenchmarkRGBToHSV(b *testing.B) {
 	b.Run("255", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			sinkFloat64, sinkFloat64, sinkFloat64 = RGBToHSV(255, 255, 255)
+		}
+	})
+}
+
+func BenchmarkRGBToGrayAverage(b *testing.B) {
+	// Not really sure how to effectively benchmark these yet
+	// so I follow BenchmarkRGBToYCbCr test (Low, Medium, High)
+	b.Run("0", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			sinkGray = RGBToGrayAverage(0, 0, 0)
+		}
+	})
+	b.Run("128", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			sinkGray = RGBToGrayAverage(128, 128, 128)
+		}
+	})
+	b.Run("255", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			sinkGray = RGBToGrayAverage(255, 255, 255)
 		}
 	})
 }

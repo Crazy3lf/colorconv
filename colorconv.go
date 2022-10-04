@@ -226,6 +226,22 @@ func HexToRGB(hex string) (r, g, b uint8, err error) {
 	return r, g, b, nil
 }
 
+//RGBToGrayAverage calculates the grayscale value of RGB with the average method, ignoring the alpha channel.
+func RGBToGrayAverage(r, g, b uint8) color.Gray {
+	return RGBToGrayWithWeight(r, g, b, 1, 1, 1)
+}
+
+// RGBToGrayWithWeight calculates the grayscale value of RGB wih provided weight, ignoring the alpha channel.
+// In the standard library image/color, the conversion used the coefficient given by the JFIF specification. It is
+// equivalent to using the weight 299, 587, 114 for rgb.
+func RGBToGrayWithWeight(r, g, b uint8, rWeight, gWeight, bWeight uint) color.Gray {
+	rw := uint(r) * rWeight
+	gw := uint(g) * gWeight
+	bw := uint(b) * bWeight
+
+	return color.Gray{Y: uint8(math.Round(float64(rw+gw+bw) / float64(rWeight+gWeight+bWeight)))}
+}
+
 func hex2uint8(hexStr string) (uint8, error) {
 	// base 16 for hexadecimal
 	result, err := strconv.ParseUint(hexStr, 16, 8)
